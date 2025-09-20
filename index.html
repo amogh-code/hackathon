@@ -34,7 +34,7 @@
         .btn-primary { background-image: linear-gradient(to right, #26A69A, #00796B, #26A69A); background-size: 200% auto; color: white; font-weight: 700; padding: 0.85rem 1.75rem; border-radius: 0.75rem; transition: all 0.4s ease; box-shadow: 0 4px 15px 0 rgba(0, 121, 107, 0.35); }
         .btn-primary:hover { background-position: right center; transform: scale(1.05); }
         .btn-redeem[disabled], .btn-pledge[disabled] { background-image: none; background-color: #9ca3af; cursor: not-allowed; transform: none; box-shadow: none; }
-        .nav-link { transition: all 0.3s ease; position: relative; padding-bottom: 4px; }
+        .nav-link { transition: all 0.3s ease; position: relative; padding-bottom: 4px; cursor: pointer; }
         .nav-link.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background-color: #00796B; border-radius: 2px; animation: slideIn 0.3s ease-out; }
         @keyframes slideIn { from { width: 0; } to { width: 100%; } }
         .fade-in-up { animation: fadeInUp 0.8s ease-out forwards; opacity: 0; }
@@ -59,11 +59,11 @@
         </header>
         
         <nav class="flex justify-center bg-white/60 backdrop-blur-sm rounded-xl p-2 mb-8 shadow-sm fade-in-up" style="animation-delay: 0.2s;">
-            <a href="#dashboard" class="nav-link active font-semibold px-6 py-2" data-page="dashboard-page">Dashboard</a>
-            <a href="#calculator" class="nav-link font-semibold px-6 py-2" data-page="calculator-page">Calculator</a>
-            <a href="#pledges" class="nav-link font-semibold px-6 py-2" data-page="pledges-page">Pledges</a>
-            <a href="#community" class="nav-link font-semibold px-6 py-2" data-page="community-page">Community</a>
-            <a href="#rewards" class="nav-link font-semibold px-6 py-2" data-page="rewards-page">Rewards</a>
+            <a class="nav-link active font-semibold px-6 py-2" data-page="dashboard-page">Dashboard</a>
+            <a class="nav-link font-semibold px-6 py-2" data-page="calculator-page">Calculator</a>
+            <a class="nav-link font-semibold px-6 py-2" data-page="pledges-page">Pledges</a>
+            <a class="nav-link font-semibold px-6 py-2" data-page="community-page">Community</a>
+            <a class="nav-link font-semibold px-6 py-2" data-page="rewards-page">Rewards</a>
         </nav>
 
         <main>
@@ -201,7 +201,21 @@
             { name: "Eco Champion", xp: 1000, svg: `<svg viewBox="0 0 100 100"><path d="M50,95 C20,95 10,60 50,10 C90,60 80,95 50,95" fill="#388E3C"/><path d="M50,10 a40,40 0 0,1 0,80 a40,40 0 0,1 0,-80" fill="#66BB6A"/><circle cx="50" cy="50" r="10" fill="gold"/></svg>`}
         ];
 
-        function showCustomAlert(message, isSuccess = false) { /* ... same as before ... */ }
+        function showCustomAlert(message, isSuccess = false) {
+            const customAlert = document.getElementById('custom-alert');
+            customAlert.textContent = message;
+            customAlert.className = `p-4 text-white rounded-lg shadow-lg ${isSuccess ? 'bg-teal-500' : 'bg-red-500'}`;
+            customAlert.classList.remove('hidden');
+            setTimeout(() => {
+                customAlert.style.opacity = '0';
+                customAlert.style.transform = 'translate(-50%, -20px)';
+            }, 2500);
+            setTimeout(() => {
+                 customAlert.classList.add('hidden');
+                 customAlert.style.opacity = '1';
+                 customAlert.style.transform = 'translateX(-50%)';
+            }, 3000);
+        }
         
         async function getOrCreateUser(uid) {
             const userRef = doc(db, "artifacts", appId, "users", uid, "profile", "data");
@@ -218,15 +232,16 @@
             const userRef = doc(db, "artifacts", appId, "users", userId, "profile", "data");
             batch.update(userRef, data);
             
-            // Also update leaderboard if points changed
-            if (data.greenPoints !== undefined) {
-                const leaderboardRef = doc(db, "artifacts", appId, "public/data/leaderboard", userId);
-                batch.set(leaderboardRef, { greenPoints: data.greenPoints, userId: userId.substring(0, 8) });
-            }
+            const user = await getOrCreateUser(userId);
+            const newPoints = data.greenPoints !== undefined ? data.greenPoints : user.greenPoints;
+
+            const leaderboardRef = doc(db, "artifacts", appId, "public/data/leaderboard", userId);
+            batch.set(leaderboardRef, { greenPoints: newPoints, userId: userId.substring(0, 8) });
+            
             await batch.commit();
 
-            const user = await getOrCreateUser(userId);
-            updateDashboardUI(user);
+            const updatedUser = await getOrCreateUser(userId);
+            updateDashboardUI(updatedUser);
         }
 
         function updateDashboardUI(userData) {
@@ -272,16 +287,239 @@
         });
 
         // --- Calculator Logic ---
-        document.getElementById('calculateBtn').addEventListener('click', async () => { /* ... mostly same calculation ... */ });
+        document.getElementById('calculateBtn').addEventListener('click', async () => {
+            playSound('click');
+            const electricityKWh = parseFloat(document.getElementById('electricity').value) || 0;
+            const transportKm = parseFloat(document.getElementById('transport').value) || 0;
+            const fuelType = document.getElementById('fuel').value;
+            const wasteKg = parseFloat(document.getElementById('waste').value) || 0;
+            if (electricityKWh === 0 && transportKm === 0 && wasteKg === 0) {
+                showCustomAlert('Please enter some consumption data.');
+                return;
+            }
+            const electricityFootprint = electricityKWh * 12 * FACTORS.ELECTRICITY;
+            const transportFootprint = fuelType === 'electric' ? (transportKm * 52 * FACTORS.ELECTRIC_CAR) : ((transportKm / FACTORS.AVG_FUEL_EFFICIENCY) * (fuelType === 'petrol' ? FACTORS.PETROL : FACTORS.DIESEL) * 52);
+            const wasteFootprint = wasteKg * 52 * FACTORS.WASTE;
+            const totalFootprint = electricityFootprint + transportFootprint + wasteFootprint;
+            
+            const earnedPoints = Math.max(0, Math.round(5000 - totalFootprint / 10));
+            const earnedXp = 50; 
+
+            document.getElementById('total-footprint').textContent = `${totalFootprint.toLocaleString(undefined, {maximumFractionDigits:0})} kg CO₂e`;
+            document.getElementById('green-points-result').textContent = `${earnedPoints.toLocaleString()} Green Points ✨`;
+            document.getElementById('xp-result').textContent = `+${earnedXp} XP`;
+            document.getElementById('results-container').classList.remove('hidden');
+
+            const user = await getOrCreateUser(userId);
+            await updateUser({
+                greenPoints: user.greenPoints + earnedPoints,
+                xp: user.xp + earnedXp,
+                footprintHistory: arrayUnion({
+                    date: new Date().toISOString().split('T')[0],
+                    footprint: totalFootprint
+                })
+            });
+             showCustomAlert(`Log successful! You've earned ${earnedXp} XP and ${earnedPoints} GP!`, true);
+        });
         
         // --- Pledges Logic ---
-        async function setupPledges() { /* ... setup pledge buttons dynamically ... */ }
+        const PLEDGES_DATA = [
+            { id: 'cup', emoji: '☕', title: 'Reusable Cup', description: 'Use a reusable cup for all your drinks.', xp: 50, points: 250 },
+            { id: 'food', emoji: '♻️', title: 'Zero Food Waste', description: 'Ensure no food goes to waste.', xp: 100, points: 500 },
+            { id: 'walk', emoji: '🚶‍♂️', title: 'Walk More', description: 'Walk for trips under 2km.', xp: 75, points: 350 },
+            { id: 'lights', emoji: '💡', title: 'Lights Off', description: 'Turn off lights when leaving a room.', xp: 40, points: 200 },
+            { id: 'bags', emoji: '🛍️', title: 'Reusable Bags', description: 'Use reusable bags for shopping.', xp: 60, points: 300 },
+            { id: 'meatless', emoji: '🥦', title: 'Meatless Monday', description: 'Go meat-free for one day a week.', xp: 90, points: 450 },
+        ];
+
+        function setupPledges() {
+            const container = document.getElementById('pledges-container');
+            container.innerHTML = '';
+            PLEDGES_DATA.forEach(pledge => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-xl shadow p-6 text-center transition hover:shadow-lg flex flex-col';
+                card.innerHTML = `
+                    <div class="text-4xl mb-3">${pledge.emoji}</div>
+                    <h3 class="text-lg font-semibold text-gray-700">${pledge.title}</h3>
+                    <p class="text-sm text-gray-500 mb-3 flex-grow">${pledge.description}</p>
+                    <button class="btn-pledge btn-primary w-full mt-auto" data-pledge="${pledge.id}" data-xp="${pledge.xp}" data-points="${pledge.points}">
+                        Pledge (+${pledge.xp} XP, ${pledge.points} GP)
+                    </button>`;
+                container.appendChild(card);
+            });
+
+            document.querySelectorAll('.btn-pledge').forEach(button => {
+                button.addEventListener('click', handlePledgeClick);
+            });
+        }
+        
+        async function handlePledgeClick(event) {
+            playSound('pledge');
+            const button = event.target;
+            const pledgeId = button.dataset.pledge;
+            const xp = parseInt(button.dataset.xp);
+            const points = parseInt(button.dataset.points);
+            
+            const user = await getOrCreateUser(userId);
+            
+            // For hackathon simplicity, we assume pledge is completed and give rewards instantly.
+            await updateUser({
+                greenPoints: user.greenPoints + points,
+                xp: user.xp + xp,
+            });
+
+            const batch = writeBatch(db);
+            const publicPledgeRef = doc(db, "artifacts", appId, "public/data/pledges", crypto.randomUUID());
+            batch.set(publicPledgeRef, { 
+                pledgeId: pledgeId, 
+                timestamp: new Date(),
+                lat: (Math.random() - 0.5) * 180,
+                lon: (Math.random() - 0.5) * 360
+            });
+            const userRef = doc(db, "artifacts", appId, "users", userId, "profile", "data");
+            const expiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+            batch.update(userRef, { [`activePledges.${pledgeId}`]: expiry });
+            await batch.commit();
+
+            showCustomAlert(`Pledge successful! You've earned ${xp} XP and ${points} GP!`, true);
+            button.disabled = true;
+            button.textContent = "Pledged!";
+        }
+
+        function updatePledgesUI(activePledges = {}) {
+            document.querySelectorAll('.btn-pledge').forEach(button => {
+                const pledgeId = button.dataset.pledge;
+                if (activePledges[pledgeId] && new Date(activePledges[pledgeId]) > new Date()) {
+                    button.disabled = true;
+                    button.textContent = 'Pledged!';
+                } else {
+                    button.disabled = false;
+                    const pledgeData = PLEDGES_DATA.find(p => p.id === pledgeId);
+                    button.textContent = `Pledge (+${pledgeData.xp} XP, ${pledgeData.points} GP)`;
+                }
+            });
+        }
+        
+        document.querySelectorAll('.btn-redeem').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                playSound('click');
+                const cost = parseInt(e.target.dataset.cost);
+                const user = await getOrCreateUser(userId);
+                if (user.greenPoints >= cost) {
+                    await updateUser({
+                        greenPoints: user.greenPoints - cost
+                    });
+                    showCustomAlert('Reward redeemed successfully!', true);
+                } else {
+                    showCustomAlert('Not enough Green Points!');
+                }
+            });
+        });
+
+        function updateRewardsUI(currentGreenPoints) {
+            document.querySelectorAll('.btn-redeem').forEach(button => {
+                const cost = parseInt(button.dataset.cost);
+                button.disabled = currentGreenPoints < cost;
+            });
+        }
+        
+        function updateHistoryChart(history = []) {
+             const ctx = document.getElementById('historyChart').getContext('2d');
+            const labels = history.slice(-10).map(h => new Date(h.date).toLocaleDateString());
+            const data = history.slice(-10).map(h => h.footprint);
+
+            if (historyChart) historyChart.destroy();
+            historyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Carbon Footprint (kg CO₂e)',
+                        data: data,
+                        borderColor: '#00796B',
+                        backgroundColor: 'rgba(0, 121, 107, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+            });
+        }
         
         // --- Community Page (Globe & Leaderboard) ---
-        let scene, camera, renderer, globe;
-        function initGlobe() { /* ... three.js globe initialization ... */ }
-        function addPledgeMarker() { /* ... adds marker to globe ... */ }
-        function animateGlobe() { /* ... globe animation loop ... */ }
+        let scene, camera, renderer, globe, isMouseDown = false, mouseX = 0, mouseY = 0, rotX = 0, rotY = 0;
+        function initGlobe() {
+            const container = document.getElementById('globe-container');
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.innerHTML = '';
+            container.appendChild(renderer.domElement);
+
+            const geometry = new THREE.SphereGeometry(5, 32, 32);
+            const material = new THREE.MeshPhongMaterial({ color: 0x4DB6AC, transparent: true, opacity: 0.8 });
+            globe = new THREE.Mesh(geometry, material);
+            scene.add(globe);
+
+            const wireframe = new THREE.LineSegments(
+                new THREE.WireframeGeometry(geometry),
+                new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.1 })
+            );
+            globe.add(wireframe);
+
+            const light = new THREE.DirectionalLight(0xffffff, 1);
+            light.position.set(5, 3, 5);
+            scene.add(light);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+            camera.position.z = 10;
+
+            container.addEventListener('mousedown', (e) => { isMouseDown = true; mouseX = e.clientX; mouseY = e.clientY; });
+            container.addEventListener('mouseup', () => { isMouseDown = false; });
+            container.addEventListener('mousemove', (e) => {
+                if (isMouseDown) {
+                    const deltaX = e.clientX - mouseX;
+                    const deltaY = e.clientY - mouseY;
+                    globe.rotation.y += deltaX * 0.005;
+                    globe.rotation.x += deltaY * 0.005;
+                    mouseX = e.clientX;
+                    mouseY = e.clientY;
+                }
+            });
+        }
+
+        function addPledgeMarker(lat, lon) {
+            playSound('pledge');
+            const phi = (90 - lat) * (Math.PI / 180);
+            const theta = (lon + 180) * (Math.PI / 180);
+            const x = -(5.1 * Math.sin(phi) * Math.cos(theta));
+            const y = 5.1 * Math.cos(phi);
+            const z = 5.1 * Math.sin(phi) * Math.sin(theta);
+
+            const markerGeo = new THREE.SphereGeometry(0.08, 16, 16);
+            const markerMat = new THREE.MeshBasicMaterial({ color: 0xFFEB3B });
+            const marker = new THREE.Mesh(markerGeo, markerMat);
+            marker.position.set(x, y, z);
+            globe.add(marker);
+            
+            // Effect to make it pop
+            let scale = 0.1;
+            const popEffect = setInterval(() => {
+                scale += 0.2;
+                marker.scale.set(scale, scale, scale);
+                if (scale >= 1) clearInterval(popEffect);
+            }, 30);
+            
+            setTimeout(() => { globe.remove(marker); }, 3000);
+        }
+
+        function animateGlobe() {
+            requestAnimationFrame(animateGlobe);
+            if (!isMouseDown) {
+                globe.rotation.y += 0.001;
+            }
+            renderer.render(scene, camera);
+        }
         
         function listenToLeaderboard() {
             const q = query(collection(db, "artifacts", appId, "public/data/leaderboard"), orderBy("greenPoints", "desc"), limit(10));
@@ -303,6 +541,18 @@
                 });
             });
         }
+
+        function listenToPublicPledges() {
+             const q = query(collection(db, "artifacts", appId, "public/data/pledges"), where("timestamp", ">", new Date(Date.now() - 60000))); // Pledges in last minute
+             onSnapshot(q, (snapshot) => {
+                 snapshot.docChanges().forEach((change) => {
+                     if (change.type === "added") {
+                         const data = change.doc.data();
+                         addPledgeMarker(data.lat, data.lon);
+                     }
+                 });
+             });
+        }
         
         // --- Authentication & Initialization ---
         document.addEventListener('DOMContentLoaded', async () => {
@@ -317,18 +567,17 @@
                 const user = await getOrCreateUser(userId);
                 updateDashboardUI(user);
                 
+                setupPledges();
                 initGlobe();
                 animateGlobe();
                 listenToLeaderboard();
+                listenToPublicPledges();
                 
             } catch (error) {
                 console.error("Firebase Auth Error:", error);
                 showCustomAlert("Could not connect. Please refresh.");
             }
         });
-
-        // NOTE: Full implementation of some functions above are omitted for brevity in this summary
-        // but are complete in the actual generated file.
     </script>
 </body>
 </html>
