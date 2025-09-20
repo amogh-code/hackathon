@@ -39,133 +39,96 @@
             background-position: right center;
             transform: scale(1.05);
         }
-        .accordion-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s ease-out, padding 0.5s ease;
-            padding: 0 1.5rem;
+        .btn-redeem[disabled] {
+            background-image: none;
+            background-color: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
-        .accordion-button.active + .accordion-content {
-            max-height: 500px;
-            padding: 1rem 1.5rem;
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
         }
-        .fade-in-up {
-            animation: fadeInUp 0.8s ease-out forwards;
-            opacity: 0;
+        .nav-link.active {
+            color: #059669;
+            border-bottom-color: #059669;
         }
+        .fade-in-up { animation: fadeInUp 0.8s ease-out forwards; opacity: 0; }
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        /* Custom alert box */
         #custom-alert {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-            transition: transform 0.5s, opacity 0.5s;
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; transition: transform 0.5s, opacity 0.5s;
         }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
 
-    <!-- Custom Alert Message -->
-    <div id="custom-alert" class="p-4 bg-red-500 text-white rounded-lg shadow-lg hidden">
-        <p>Please enter some data to calculate your footprint!</p>
-    </div>
+    <div id="custom-alert" class="p-4 bg-red-500 text-white rounded-lg shadow-lg hidden"></div>
 
     <div class="container mx-auto p-4 md:p-8 max-w-6xl">
-        <!-- Header -->
-        <header class="text-center mb-10 fade-in-up">
+        <header class="text-center mb-6 fade-in-up">
             <h1 class="text-4xl md:text-5xl font-extrabold text-emerald-700 mb-2">Your Path to a <span class="text-emerald-500">Green Future</span></h1>
-            <p class="text-lg text-gray-600">Calculate your carbon footprint and discover how to reduce it.</p>
+            <p class="text-lg text-gray-600">Analyze your footprint, earn points, and get rewarded for your eco-friendly lifestyle.</p>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Input Section -->
-            <div class="card p-8 space-y-6 fade-in-up" style="animation-delay: 0.2s;">
-                <h2 class="text-2xl font-bold text-gray-800 border-b-2 border-emerald-300 pb-2 mb-4">Your Consumption Habits</h2>
-                
-                <div class="relative">
-                    <label for="electricity" class="font-semibold text-gray-700">Monthly Electricity Usage (kWh)</label>
-                    <input type="number" id="electricity" placeholder="e.g., 350" class="w-full p-3 pl-10 mt-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition">
-                    <span class="absolute left-3 top-11 text-emerald-500">💡</span>
-                </div>
+        <!-- Navigation -->
+        <nav class="flex justify-center bg-white/50 backdrop-blur-sm rounded-xl p-2 mb-8 shadow-sm fade-in-up" style="animation-delay: 0.2s;">
+            <a href="#calculator" class="nav-link active font-semibold px-6 py-2" data-page="calculator-page">Calculator</a>
+            <a href="#about" class="nav-link font-semibold px-6 py-2" data-page="about-page">About</a>
+            <a href="#rewards" class="nav-link font-semibold px-6 py-2" data-page="rewards-page">Rewards</a>
+        </nav>
 
-                <div class="relative">
-                    <label for="transport" class="font-semibold text-gray-700">Weekly Distance Driven (km)</label>
-                    <input type="number" id="transport" placeholder="e.g., 150" class="w-full p-3 pl-10 mt-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition">
-                    <span class="absolute left-3 top-11 text-emerald-500">🚗</span>
-                     <select id="fuel" class="w-full p-3 mt-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition">
-                        <option value="petrol">Gasoline/Petrol Car</option>
-                        <option value="diesel">Diesel Car</option>
-                        <option value="electric">Electric Car</option>
-                    </select>
+        <!-- Page Content -->
+        <main>
+            <!-- Calculator Page -->
+            <div id="calculator-page" class="page">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="card p-8 space-y-6">
+                        <h2 class="text-2xl font-bold text-gray-800 border-b-2 border-emerald-300 pb-2 mb-4">Your Consumption Habits</h2>
+                        <div class="relative"><label for="electricity" class="font-semibold text-gray-700">Monthly Electricity Usage (kWh)</label><input type="number" id="electricity" placeholder="e.g., 350" class="w-full p-3 pl-10 mt-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 transition"><span class="absolute left-3 top-11 text-emerald-500">💡</span></div>
+                        <div class="relative"><label for="transport" class="font-semibold text-gray-700">Weekly Distance Driven (km)</label><input type="number" id="transport" placeholder="e.g., 150" class="w-full p-3 pl-10 mt-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 transition"><span class="absolute left-3 top-11 text-emerald-500">🚗</span><select id="fuel" class="w-full p-3 mt-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 transition"><option value="petrol">Gasoline/Petrol Car</option><option value="diesel">Diesel Car</option><option value="electric">Electric Car</option></select></div>
+                        <div class="relative"><label for="waste" class="font-semibold text-gray-700">Weekly Household Waste (kg)</label><input type="number" id="waste" placeholder="e.g., 5" class="w-full p-3 pl-10 mt-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 transition"><span class="absolute left-3 top-11 text-emerald-500">🗑️</span></div>
+                        <button id="calculateBtn" class="w-full btn-primary mt-4">Calculate My Footprint</button>
+                    </div>
+                    <div id="results-container" class="card p-8 hidden"><h2 class="text-2xl font-bold text-gray-800 border-b-2 border-emerald-300 pb-2 mb-4">Your Annual Footprint</h2><div class="text-center my-6"><p class="text-lg text-gray-600">Total Emissions:</p><p id="total-footprint" class="text-5xl font-extrabold text-emerald-600">0 kg CO₂e</p><p class="text-sm text-gray-500 mt-2">Equivalent to <span id="tree-equivalent" class="font-semibold text-emerald-700">0</span> trees.</p><div class="mt-4"><p class="text-lg text-gray-600">You've Earned:</p><p id="green-points-result" class="text-3xl font-bold text-amber-500">0 Green Points ✨</p></div></div><div class="w-full max-w-sm mx-auto h-56"><canvas id="footprintChart"></canvas></div></div>
                 </div>
-
-                <div class="relative">
-                    <label for="waste" class="font-semibold text-gray-700">Weekly Household Waste (kg)</label>
-                    <input type="number" id="waste" placeholder="e.g., 5" class="w-full p-3 pl-10 mt-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition">
-                    <span class="absolute left-3 top-11 text-emerald-500">🗑️</span>
-                </div>
-
-                <button id="calculateBtn" class="w-full btn-primary mt-4">Calculate My Footprint</button>
+                <div id="suggestions-container" class="mt-10 card p-8 hidden"><h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Your Personalized Green Plan</h2><div class="space-y-4"><div class="bg-emerald-50 rounded-lg border border-emerald-200"><button class="accordion-button w-full text-left p-4 font-semibold text-lg flex justify-between items-center transition text-emerald-800"><span>💡 Reduce Electricity Consumption</span><svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button><div class="accordion-content text-emerald-700"><ul class="list-disc list-inside space-y-2"><li>Switch to LED bulbs.</li><li>Unplug unused electronics.</li><li>Choose energy-efficient appliances.</li><li>Wash clothes in cold water.</li><li>Consider solar panels.</li></ul></div></div><div class="bg-amber-50 rounded-lg border border-amber-200"><button class="accordion-button w-full text-left p-4 font-semibold text-lg flex justify-between items-center transition text-amber-800"><span>🚗 Greener Transportation</span><svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button><div class="accordion-content text-amber-700"><ul class="list-disc list-inside space-y-2"><li>Walk, bike, or use public transport.</li><li>Carpool with others.</li><li>Maintain your vehicle regularly.</li><li>Drive smoothly, not aggressively.</li><li>Consider a hybrid or electric vehicle next.</li></ul></div></div><div class="bg-violet-50 rounded-lg border border-violet-200"><button class="accordion-button w-full text-left p-4 font-semibold text-lg flex justify-between items-center transition text-violet-800"><span>🗑️ Minimize Your Waste</span><svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button><div class="accordion-content text-violet-700"><ul class="list-disc list-inside space-y-2"><li>Follow the 3 R's: Reduce, Reuse, Recycle.</li><li>Compost your food scraps.</li><li>Avoid single-use plastics.</li><li>Buy products with less packaging.</li><li>Donate or repair items.</li></ul></div></div></div></div>
             </div>
 
-            <!-- Results Section -->
-            <div id="results-container" class="card p-8 hidden">
-                 <h2 class="text-2xl font-bold text-gray-800 border-b-2 border-emerald-300 pb-2 mb-4">Your Annual Footprint</h2>
-                 <div class="text-center my-6">
-                     <p class="text-lg text-gray-600">Total Emissions:</p>
-                     <p id="total-footprint" class="text-5xl font-extrabold text-emerald-600">0 kg CO₂e</p>
-                     <p class="text-sm text-gray-500 mt-2">Equivalent to the carbon absorbed by <span id="tree-equivalent" class="font-semibold text-emerald-700">0</span> trees in a year.</p>
-                 </div>
-                 <div class="w-full max-w-sm mx-auto h-64">
-                    <canvas id="footprintChart"></canvas>
-                 </div>
-            </div>
-        </div>
-
-        <!-- Suggestions Section -->
-        <div id="suggestions-container" class="mt-10 card p-8 hidden">
-            <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Your Personalized Green Plan</h2>
-            <div class="space-y-4">
-                <div class="bg-emerald-50 rounded-lg border border-emerald-200">
-                    <button class="accordion-button w-full text-left p-4 font-semibold text-lg flex justify-between items-center transition text-emerald-800">
-                        <span>💡 Reduce Electricity Consumption</span>
-                        <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div class="accordion-content text-emerald-700"><ul class="list-disc list-inside space-y-2"><li>Switch to LED bulbs.</li><li>Unplug unused electronics.</li><li>Choose energy-efficient appliances.</li><li>Wash clothes in cold water.</li><li>Consider solar panels.</li></ul></div>
-                </div>
-                <div class="bg-amber-50 rounded-lg border border-amber-200">
-                    <button class="accordion-button w-full text-left p-4 font-semibold text-lg flex justify-between items-center transition text-amber-800">
-                        <span>🚗 Greener Transportation</span>
-                        <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div class="accordion-content text-amber-700"><ul class="list-disc list-inside space-y-2"><li>Walk, bike, or use public transport.</li><li>Carpool with others.</li><li>Maintain your vehicle regularly.</li><li>Drive smoothly, not aggressively.</li><li>Consider a hybrid or electric vehicle next.</li></ul></div>
-                </div>
-                <div class="bg-violet-50 rounded-lg border border-violet-200">
-                     <button class="accordion-button w-full text-left p-4 font-semibold text-lg flex justify-between items-center transition text-violet-800">
-                        <span>🗑️ Minimize Your Waste</span>
-                        <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div class="accordion-content text-violet-700"><ul class="list-disc list-inside space-y-2"><li>Follow the 3 R's: Reduce, Reuse, Recycle.</li><li>Compost your food scraps.</li><li>Avoid single-use plastics.</li><li>Buy products with less packaging.</li><li>Donate or repair items.</li></ul></div>
+            <!-- About Page -->
+            <div id="about-page" class="page hidden card p-8">
+                <h2 class="text-3xl font-bold text-gray-800 border-b-2 border-emerald-300 pb-2 mb-6">About Carbon Footprints</h2>
+                <div class="space-y-6 text-gray-700">
+                    <div><h3 class="text-xl font-semibold text-emerald-700 mb-2">What is a Carbon Footprint?</h3><p>A carbon footprint is the total amount of greenhouse gases—primarily carbon dioxide (CO₂)—released into the atmosphere by the activities of an individual, event, organization, or product. It's a measure of your impact on the environment and contribution to climate change.</p></div>
+                    <div><h3 class="text-xl font-semibold text-emerald-700 mb-2">Why Does It Matter?</h3><p>High levels of greenhouse gases trap heat in the atmosphere, leading to global warming. By understanding and reducing your carbon footprint, you can directly contribute to combating climate change, conserving resources, and promoting a healthier planet for future generations.</p></div>
+                    <div><h3 class="text-xl font-semibold text-emerald-700 mb-2">Key Components We Calculate:</h3><ul class="list-disc list-inside ml-4 space-y-2"><li><b>Electricity:</b> The energy used to power your home often comes from burning fossil fuels, which releases CO₂.</li><li><b>Transportation:</b> Gasoline and diesel vehicles are major sources of emissions. Electric vehicles are cleaner, but their impact depends on how the electricity is generated.</li><li><b>Waste:</b> Waste sent to landfills decomposes and releases methane, a greenhouse gas even more potent than CO₂.</li></ul></div>
                 </div>
             </div>
-        </div>
 
+            <!-- Rewards Page -->
+            <div id="rewards-page" class="page hidden card p-8">
+                <div class="text-center border-b-2 border-emerald-300 pb-4 mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">Green Rewards Store</h2>
+                    <p class="text-lg text-gray-600 mt-2">Redeem your points for eco-friendly products and services!</p>
+                    <div class="mt-4 bg-amber-100 border border-amber-300 inline-block p-4 rounded-xl">
+                        <p class="text-lg font-semibold text-amber-800">Your Balance:</p>
+                        <p id="green-points-reward" class="text-4xl font-extrabold text-amber-600">0 GP</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Reward Item -->
+                    <div class="bg-white rounded-xl shadow p-4 flex flex-col items-center text-center transition hover:shadow-lg"><img src="https://placehold.co/200x150/34D399/FFFFFF?text=Eco+Bottle" class="rounded-lg mb-4" alt="Eco Bottle"><h3 class="text-lg font-semibold text-gray-700">Reusable Water Bottle</h3><p class="text-emerald-600 font-bold my-2">2,500 GP</p><button class="btn-redeem btn-primary w-full" data-cost="2500">Redeem</button></div>
+                    <div class="bg-white rounded-xl shadow p-4 flex flex-col items-center text-center transition hover:shadow-lg"><img src="https://placehold.co/200x150/34D399/FFFFFF?text=Plant+Tree" class="rounded-lg mb-4" alt="Plant Tree"><h3 class="text-lg font-semibold text-gray-700">Plant a Tree Donation</h3><p class="text-emerald-600 font-bold my-2">5,000 GP</p><button class="btn-redeem btn-primary w-full" data-cost="5000">Redeem</button></div>
+                    <div class="bg-white rounded-xl shadow p-4 flex flex-col items-center text-center transition hover:shadow-lg"><img src="https://placehold.co/200x150/34D399/FFFFFF?text=Solar+Discount" class="rounded-lg mb-4" alt="Solar Discount"><h3 class="text-lg font-semibold text-gray-700">10% Off Solar Panels</h3><p class="text-emerald-600 font-bold my-2">15,000 GP</p><button class="btn-redeem btn-primary w-full" data-cost="15000">Redeem</button></div>
+                </div>
+            </div>
+        </main>
     </div>
     
-    <footer class="text-center p-6 mt-10">
-        <p class="text-gray-500">Made with 💚 by Hemashree</p>
-    </footer>
+    <footer class="text-center p-6 mt-10"><p class="text-gray-500">Made with 💚 by Hemashree</p></footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -175,21 +138,34 @@
             const totalFootprintEl = document.getElementById('total-footprint');
             const treeEquivalentEl = document.getElementById('tree-equivalent');
             const customAlert = document.getElementById('custom-alert');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const pages = document.querySelectorAll('.page');
+            const greenPointsResultEl = document.getElementById('green-points-result');
+            const greenPointsRewardEl = document.getElementById('green-points-reward');
+            const redeemButtons = document.querySelectorAll('.btn-redeem');
 
             let footprintChart = null;
+            let currentGreenPoints = 0;
 
-            const FACTORS = {
-                ELECTRICITY: 0.82, PETROL: 2.31, DIESEL: 2.68,
-                ELECTRIC_CAR: 0.05, WASTE: 0.59, AVG_FUEL_EFFICIENCY: 12, TREE_SEQ: 21
-            };
+            const FACTORS = { ELECTRICITY: 0.82, PETROL: 2.31, DIESEL: 2.68, ELECTRIC_CAR: 0.05, WASTE: 0.59, AVG_FUEL_EFFICIENCY: 12, TREE_SEQ: 21 };
             
-            function showCustomAlert(message) {
+            function showCustomAlert(message, isSuccess = false) {
                 customAlert.textContent = message;
+                customAlert.className = `p-4 text-white rounded-lg shadow-lg ${isSuccess ? 'bg-emerald-500' : 'bg-red-500'}`;
                 customAlert.classList.remove('hidden');
-                setTimeout(() => {
-                   customAlert.classList.add('hidden');
-                }, 3000);
+                setTimeout(() => { customAlert.classList.add('hidden'); }, 3000);
             }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const pageId = link.getAttribute('data-page');
+                    pages.forEach(page => page.classList.add('hidden'));
+                    document.getElementById(pageId).classList.remove('hidden');
+                    navLinks.forEach(nav => nav.classList.remove('active'));
+                    link.classList.add('active');
+                });
+            });
 
             calculateBtn.addEventListener('click', () => {
                 const electricityKWh = parseFloat(document.getElementById('electricity').value) || 0;
@@ -202,34 +178,51 @@
                     return;
                 }
                 
-                // The calculation is now instantaneous.
-                // I've removed the artificial delay and the "Calculating..." button state for a faster experience.
                 const electricityFootprint = electricityKWh * 12 * FACTORS.ELECTRICITY;
-                let transportFootprint = 0;
-                if (fuelType === 'electric') {
-                    transportFootprint = transportKm * 52 * FACTORS.ELECTRIC_CAR;
-                } else {
-                    const fuelFactor = fuelType === 'petrol' ? FACTORS.PETROL : FACTORS.DIESEL;
-                    transportFootprint = (transportKm / FACTORS.AVG_FUEL_EFFICIENCY) * fuelFactor * 52;
-                }
+                const transportFootprint = fuelType === 'electric' ? (transportKm * 52 * FACTORS.ELECTRIC_CAR) : ((transportKm / FACTORS.AVG_FUEL_EFFICIENCY) * (fuelType === 'petrol' ? FACTORS.PETROL : FACTORS.DIESEL) * 52);
                 const wasteFootprint = wasteKg * 52 * FACTORS.WASTE;
                 const totalFootprint = electricityFootprint + transportFootprint + wasteFootprint;
 
-                // Animate the result numbers
+                // Points Calculation: More points for a smaller footprint.
+                currentGreenPoints = Math.max(0, Math.round(20000 - totalFootprint));
+                updatePointsUI();
+
                 animateValue(totalFootprintEl, 0, totalFootprint, 1000, ' kg CO₂e');
                 animateValue(treeEquivalentEl, 0, Math.round(totalFootprint / FACTORS.TREE_SEQ), 1000, '');
                 
                 resultsContainer.classList.remove('hidden');
-                resultsContainer.classList.add('fade-in-up');
                 suggestionsContainer.classList.remove('hidden');
-                suggestionsContainer.classList.add('fade-in-up');
-                suggestionsContainer.style.animationDelay = '0.2s';
                 
                 if (window.innerWidth < 1024) {
                     resultsContainer.scrollIntoView({ behavior: 'smooth' });
                 }
 
                 updateChart([electricityFootprint, transportFootprint, wasteFootprint]);
+                updateRewardsUI();
+            });
+
+            function updatePointsUI() {
+                greenPointsResultEl.textContent = `${currentGreenPoints.toLocaleString()} Green Points ✨`;
+                greenPointsRewardEl.textContent = `${currentGreenPoints.toLocaleString()} GP`;
+            }
+            
+            function updateRewardsUI() {
+                redeemButtons.forEach(button => {
+                    const cost = parseInt(button.dataset.cost, 10);
+                    button.disabled = currentGreenPoints < cost;
+                });
+            }
+
+            redeemButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const cost = parseInt(button.dataset.cost, 10);
+                    if (currentGreenPoints >= cost) {
+                        currentGreenPoints -= cost;
+                        updatePointsUI();
+                        updateRewardsUI();
+                        showCustomAlert('Reward redeemed successfully!', true);
+                    }
+                });
             });
 
             function animateValue(element, start, end, duration, suffix) {
@@ -238,62 +231,37 @@
                     if (!startTimestamp) startTimestamp = timestamp;
                     const progress = Math.min((timestamp - startTimestamp) / duration, 1);
                     element.innerHTML = Math.floor(progress * (end - start) + start).toLocaleString() + suffix;
-                    if (progress < 1) {
-                        window.requestAnimationFrame(step);
-                    }
+                    if (progress < 1) window.requestAnimationFrame(step);
                 };
                 window.requestAnimationFrame(step);
             }
 
             function updateChart(data) {
                 const ctx = document.getElementById('footprintChart').getContext('2d');
-                const chartData = {
-                    labels: ['Electricity', 'Transport', 'Waste'],
-                    datasets: [{
-                        data: data.map(val => val.toFixed(0)),
-                        backgroundColor: ['#10B981', '#F59E0B', '#8B5CF6'],
-                        borderColor: 'rgba(255,255,255,0.8)',
-                        borderWidth: 4,
-                        hoverOffset: 15,
-                        hoverBorderColor: '#fff'
-                    }]
-                };
-
-                if (footprintChart) {
-                    footprintChart.data = chartData;
-                    footprintChart.update();
-                } else {
-                    footprintChart = new Chart(ctx, {
-                        type: 'doughnut',
-                        data: chartData,
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { position: 'bottom', labels: { font: { size: 14, family: "'Inter', sans-serif" }, color: '#4B5563' } }
-                            },
-                            cutout: '65%'
-                        }
-                    });
-                }
+                if (footprintChart) footprintChart.destroy();
+                footprintChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Electricity', 'Transport', 'Waste'],
+                        datasets: [{ data: data.map(v => v.toFixed(0)), backgroundColor: ['#10B981', '#F59E0B', '#8B5CF6'], borderColor: 'rgba(255,255,255,0.8)', borderWidth: 4, hoverOffset: 15 }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 14, family: "'Inter', sans-serif" }, color: '#4B5563' } } }, cutout: '65%' }
+                });
             }
             
-            const accordions = document.querySelectorAll('.accordion-button');
-            accordions.forEach(button => {
+            document.querySelectorAll('.accordion-button').forEach(button => {
                 button.addEventListener('click', () => {
                     const currentlyActive = document.querySelector('.accordion-button.active');
-                    if(currentlyActive && currentlyActive !== button){
-                        currentlyActive.classList.remove('active');
-                        currentlyActive.querySelector('svg').style.transform = 'rotate(0deg)';
-                    }
+                    if(currentlyActive && currentlyActive !== button){ currentlyActive.classList.remove('active'); currentlyActive.querySelector('svg').style.transform = 'rotate(0deg)'; }
                     button.classList.toggle('active');
-                    const svg = button.querySelector('svg');
-                    svg.style.transform = button.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
+                    button.querySelector('svg').style.transform = button.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
                 });
             });
+            
+            // Initialize
+            updateRewardsUI();
         });
     </script>
 </body>
 </html>
-
 
